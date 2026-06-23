@@ -12,6 +12,9 @@ inputs:
   NUGET_USER:
     description: Username for NuGet login (OIDC → temp API key)
     required: true
+  GITHUB_TOKEN:
+    description: GitHub token for GitHub Packages push (pass secrets.GITHUB_TOKEN)
+    required: true
 runs:
   using: "composite"
   steps:
@@ -20,6 +23,7 @@ runs:
         fetch-depth: 0
 
     - name: Extract version from tag
+      shell: bash
       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
     - name: Setup .NET
@@ -28,12 +32,15 @@ runs:
         dotnet-version: ${{ inputs.DOTNET_VERSION }}
 
     - name: Restore dependencies
+      shell: bash
       run: dotnet restore ${{ inputs.PROJECT_FILE_PATH }}
 
     - name: Build
+      shell: bash
       run: dotnet build ${{ inputs.PROJECT_FILE_PATH }} -c Release --no-restore
 
     - name: Pack
+      shell: bash
       run: dotnet pack ${{ inputs.PROJECT_FILE_PATH }} -c Release --no-build -o packages /p:Version=${{ env.VERSION }}
 
     - name: NuGet login (OIDC → temp API key)
@@ -43,10 +50,12 @@ runs:
         user: ${{ inputs.NUGET_USER }}
 
     - name: NuGet push
+      shell: bash
       run: dotnet nuget push packages/*.nupkg --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
 
     - name: Github Packages push
-      run: dotnet nuget push packages/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source https://nuget.pkg.github.com/viklover/index.json --skip-duplicate
+      shell: bash
+      run: dotnet nuget push packages/*.nupkg --api-key ${{ inputs.GITHUB_TOKEN }} --source https://nuget.pkg.github.com/viklover/index.json --skip-duplicate
 
 branding:
     icon: package
