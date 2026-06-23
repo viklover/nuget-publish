@@ -52,7 +52,3 @@ on:
 
 - [NuGet OIDC federation](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/configuring-openid-connect-in-nuget) must be configured for your NuGet.org account.
 - GitHub Packages must be enabled for the repository or organisation.
-
-## License
-
-MIT
