@@ -22,6 +22,7 @@ jobs:
           DOTNET_VERSION: '8.x'
           PROJECT_FILE_PATH: src/MyProject/MyProject.csproj
           NUGET_USER: ${{ secrets.NUGET_USER }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ## Inputs
@@ -31,6 +32,7 @@ jobs:
 | `DOTNET_VERSION`    | Yes      | Version of the .NET SDK to use (e.g. `8.x`, `9.0`)         |
 | `PROJECT_FILE_PATH` | Yes      | Path to the `.csproj` file, relative to repository root     |
 | `NUGET_USER`        | Yes      | Username for NuGet OIDC login (gets a temporary API key)    |
+| `GITHUB_TOKEN`      | Yes      | `${{ secrets.GITHUB_TOKEN }}` for GitHub Packages push      |
 
 ## How it works
 
