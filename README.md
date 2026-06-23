@@ -16,6 +16,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
+> **Important**: This action must be triggered by a tag push (`v*`). The package version is extracted from the tag name (e.g. `v1.2.3` → version `1.2.3`). Without a tag, the version will be incorrect.
+
 ## Inputs
 
 | Input               | Required | Description                                                 |
