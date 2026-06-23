@@ -1,0 +1,57 @@
+name: NuGet Publisher
+author: Mihail Vorobyev (@viklover)
+description: Build, Pack & Publish a NuGet package
+
+inputs:
+  DOTNET_VERSION:
+    description: Version of dotnet 
+    required: true
+  PROJECT_FILE_PATH:
+    description: Filepath of the project to be packaged, relative to root of repository
+    required: true
+  NUGET_USER:
+    description: Username for NuGet login (OIDC → temp API key)
+    required: true
+  GITHUB_API_KEY:
+    description: API key to authenticate with Github Packages NuGet server
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+
+    - name: Extract version from tag
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ inputs.DOTNET_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore ${{ inputs.PROJECT_FILE_PATH }}
+
+    - name: Build
+      run: dotnet build ${{ inputs.PROJECT_FILE_PATH }} -c Release --no-restore
+
+    - name: Pack
+      run: dotnet pack ${{ inputs.PROJECT_FILE_PATH }} -c Release --no-build -o packages /p:Version=${{ env.VERSION }}
+
+    - name: NuGet login (OIDC → temp API key)
+      uses: NuGet/login@v1
+      id: login
+      with:
+        user: ${{ secrets.NUGET_USER }}
+
+    - name: NuGet push
+      run: dotnet nuget push packages/*.nupkg --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+    - name: Github Packages push
+      run: dotnet nuget push packages/*.nupkg --api-key ${{ inputs.GITHUB_API_KEY }} --source https://nuget.pkg.github.com/viklover/index.json --skip-duplicate
+
+branding:
+    icon: package
+    color: blue
