@@ -55,7 +55,7 @@ runs:
 
     - name: Github Packages push
       shell: bash
-      run: dotnet nuget push packages/*.nupkg --api-key ${{ inputs.GITHUB_TOKEN }} --source https://nuget.pkg.github.com/viklover/index.json --skip-duplicate
+      run: dotnet nuget push packages/*.nupkg --api-key ${{ inputs.GITHUB_TOKEN }} --source https://nuget.pkg.github.com/${GITHUB_REPOSITORY_OWNER}/index.json --skip-duplicate
 
 branding:
     icon: package
